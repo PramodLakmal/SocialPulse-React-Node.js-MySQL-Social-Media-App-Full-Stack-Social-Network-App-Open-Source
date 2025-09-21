@@ -8,7 +8,7 @@ import './App.css';
 
 
 // Pages
-import Login from './pages/login';
+import Login from './pages/Login';
 import Register from './pages/register';
 import Home from './pages/home';
 import Profile from './pages/profile';
@@ -28,7 +28,7 @@ import {
 function App() {
 
 
-const { currentUser } = useContext(AuthContext);
+const { currentUser, loading } = useContext(AuthContext);
 
 const queryClient = new QueryClient()
 
@@ -53,12 +53,28 @@ const queryClient = new QueryClient()
     );
   };
 
-  console.log(currentUser)
+  console.log("Current user:", currentUser)
+  console.log("Loading state:", loading)
+  
   // eslint-disable-next-line react/prop-types
   const ProtectedRoute = ({ children }) => {
-    if (currentUser===null) {
-      return <Navigate to="/login" />;
+    // Show loading spinner while checking authentication
+    if (loading) {
+      console.log("Showing loading spinner...");
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      );
     }
+    
+    // Only redirect to login if we're sure the user is not authenticated
+    // and we're not in a loading state
+    if (!loading && currentUser === null) {
+      console.log("No user found, redirecting to login");
+      return <Navigate to="/login" replace />;
+    }
+    
     return children;
   };
 

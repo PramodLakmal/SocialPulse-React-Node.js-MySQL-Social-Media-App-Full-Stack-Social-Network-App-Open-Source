@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 
 const Register = () => {
 
@@ -110,10 +111,16 @@ const Register = () => {
               </label>
             </div>
             <div className="form-control mt-6">
-              <span>{err && err}</span>
-              <button onClick={handleClick} className="btn btn-primary">
+              <span>{err && <div className="text-red-500 text-sm mb-2">{err}</div>}</span>
+              <button onClick={handleClick} className="btn btn-primary mb-4">
                 Register
               </button>
+              
+              {/* Divider */}
+              <div className="divider">OR</div>
+              
+              {/* Google Login Button */}
+              <GoogleLoginButton />
             </div>
           </form>
         </div>
