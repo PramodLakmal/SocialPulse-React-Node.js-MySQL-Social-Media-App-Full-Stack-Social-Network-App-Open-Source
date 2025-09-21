@@ -6,14 +6,21 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const register = (req, res) => {
-  //CHECK USER IF EXISTS
+  // Password strength validation
+  if (!isStrongPassword(req.body.password)) {
+    return res.status(400).json({
+      message:
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
+    });
+  }
 
+  //CHECK USER IF EXISTS
   const q = "SELECT * FROM users WHERE username = ?";
   console.log(req.body.password)
   db.query(q, [req.body.username], (err, data) => {
     if (err) return res.status(500).json(err);
     if (data.length) return res.status(409).json("User already exists!");
-    
+
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
@@ -29,23 +36,23 @@ export const register = (req, res) => {
 
     db.query(insertQuery, [values], (err, result) => {
       if (err) return res.status(500).json(err);
-      
+
       // Get the newly created user's ID
       const newUserId = result.insertId;
-      
+
       // Fetch the complete user data (excluding password)
       const getUserQuery = "SELECT id, username, email, name, profilePic, coverPic, city, website FROM users WHERE id = ?";
-      
+
       db.query(getUserQuery, [newUserId], (err, userData) => {
         if (err) return res.status(500).json(err);
-        
+
         if (userData.length === 0) {
           return res.status(500).json("Failed to retrieve user data");
         }
-        
+
         // Generate JWT token for auto-login
         const token = jwt.sign({ id: newUserId }, "secretkey");
-        
+
         // Set cookie and return user data (auto-login)
         res
           .cookie("accessToken", token, {
@@ -58,9 +65,14 @@ export const register = (req, res) => {
   });
 };
 
+function isStrongPassword(password) {
+  // At least 8 characters, one uppercase, one lowercase, one number, one special character
+  const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  return strongPasswordRegex.test(password);
+}
 
 // export const register = (req, res) => {
-  
+
 //   const checkUserQuery = "SELECT * FROM users WHERE username = ?";
 //   db.query(checkUserQuery, [req.body.username], (err, data) => {
 //     if (err) return res.status(500).json(err);
@@ -120,9 +132,9 @@ export const login = (req, res) => {
 
 export const logout = (req, res) => {
   //console.log("working")
-  res.clearCookie("accessToken",{
-    secure:true,
-    sameSite:"none"
+  res.clearCookie("accessToken", {
+    secure: true,
+    sameSite: "none"
   }).status(200).json("User has been logged out.")
 };
 
@@ -131,7 +143,7 @@ export const googleAuthSuccess = (req, res) => {
   try {
     console.log("Google auth success callback triggered");
     console.log("User object:", req.user ? 'Present' : 'Missing');
-    
+
     if (!req.user) {
       console.error("No user object in request");
       return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
@@ -140,7 +152,7 @@ export const googleAuthSuccess = (req, res) => {
     console.log("Creating JWT for user ID:", req.user.id);
     // Generate JWT token
     const token = jwt.sign({ id: req.user.id }, "secretkey");
-    
+
     // Remove password from user object
     const { password, ...userWithoutPassword } = req.user;
     console.log("User authenticated successfully:", userWithoutPassword.email);
@@ -154,7 +166,7 @@ export const googleAuthSuccess = (req, res) => {
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
       })
       .redirect(`${process.env.FRONTEND_URL}/`);
-      
+
     console.log("Redirecting to frontend with auth cookie set");
   } catch (error) {
     console.error("Google auth success error:", error);
