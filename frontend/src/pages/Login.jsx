@@ -2,6 +2,7 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 const Login = () => {
 
@@ -10,21 +11,33 @@ const Login = () => {
     password: "",
   });
   const [err, setErr] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
 const navigate = useNavigate() 
 
   const handleChange = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
-  const { login } = useContext(AuthContext);
+  const { login, loading } = useContext(AuthContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErr(null); // Clear previous errors
+    setIsLoading(true);
+    
     try {
-      await login(inputs);
-      navigate("/")
+      const userData = await login(inputs);
+      if (userData) {
+        // Small delay to ensure state is set
+        setTimeout(() => {
+          navigate("/");
+        }, 100);
+      }
     } catch (err) {
-      setErr(err.response.data);
+      console.error("Login error:", err);
+      setErr(err.response?.data || "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,8 +69,20 @@ const navigate = useNavigate()
             </label>
           </div>
           <div className="form-control mt-6">
-            {err && err}
-            <button onClick={handleLogin} className="btn btn-primary">Login</button>
+            {err && <div className="text-red-500 text-sm mb-2">{err}</div>}
+            <button 
+              onClick={handleLogin} 
+              className={`btn btn-primary mb-4 ${(isLoading || loading) ? 'loading' : ''}`}
+              disabled={isLoading || loading}
+            >
+              {(isLoading || loading) ? 'Logging in...' : 'Login'}
+            </button>
+            
+            {/* Divider */}
+            <div className="divider">OR</div>
+            
+            {/* Google Login Button */}
+            <GoogleLoginButton />
           </div>
         </form>
       </div>
