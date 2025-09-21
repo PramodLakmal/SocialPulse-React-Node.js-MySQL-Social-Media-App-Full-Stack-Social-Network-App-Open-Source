@@ -3,50 +3,74 @@ import { Link, useNavigate } from "react-router-dom";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 import { AuthContext } from "../context/AuthContext";
 
+function isStrongPassword(password) {
+  // At least 8 characters, one uppercase, one lowercase, one number, one special character
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+}
+
 const Register = () => {
 
-    const [inputs, setInputs] = useState({
-      username: "",
-      email: "",
-      password: "",
-      name: "",
-    });
-    const [err, setErr] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    
-    const navigate = useNavigate();
-    const { register, loading } = useContext(AuthContext);
-  
-    const handleChange = (e) => {
-      setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    };
-  
-    const handleClick = async (e) => {
-      e.preventDefault();
-      setErr(null); // Clear previous errors
-      setIsLoading(true);
-  
-      try {
-        console.log("Attempting registration...");
-        const userData = await register(inputs);
-        
-        if (userData) {
-          console.log("Registration and auto-login successful, redirecting to home...");
-          // Redirect to home page
-          setTimeout(() => {
-            navigate("/", { replace: true });
-          }, 100);
-        }
-        
-      } catch (error) {
-        console.error("Registration error:", error);
-        setErr(error.response?.data || "Registration failed. Please try again.");
-      } finally {
-        setIsLoading(false);
+  const [inputs, setInputs] = useState({
+    username: "",
+    email: "",
+    password: "",
+    name: "",
+  });
+  const [passwordError, setPasswordError] = useState("");
+  const [err, setErr] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const { register, loading } = useContext(AuthContext);
+
+  const handleChange = (e) => {
+    setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    if (e.target.name === "password") {
+      if (!isStrongPassword(e.target.value)) {
+        setPasswordError(
+          "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
+        );
+      } else {
+        setPasswordError("");
       }
-    };
-  
-    console.log(err)
+    }
+  };
+
+  const handleClick = async (e) => {
+    e.preventDefault();
+    setErr(null); // Clear previous errors
+
+    // Prevent submission if password is weak
+    if (!isStrongPassword(inputs.password)) {
+      setPasswordError(
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
+      );
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      console.log("Attempting registration...");
+      const userData = await register(inputs);
+
+      if (userData) {
+        console.log("Registration and auto-login successful, redirecting to home...");
+        // Redirect to home page
+        setTimeout(() => {
+          navigate("/", { replace: true });
+        }, 100);
+      }
+
+    } catch (error) {
+      console.error("Registration error:", error);
+      setErr(error.response?.data || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  console.log(err)
 
   return (
     <div className="hero min-h-screen bg-base-200">
@@ -117,6 +141,9 @@ const Register = () => {
                 onChange={handleChange}
                 required
               />
+              {passwordError && (
+                <div className="text-red-500 text-xs mt-1">{passwordError}</div>
+              )}
               <label className="label">
                 <a href="#" className="label-text-alt link link-hover">
                   Forgot password?
@@ -125,17 +152,17 @@ const Register = () => {
             </div>
             <div className="form-control mt-6">
               <span>{err && <div className="text-red-500 text-sm mb-2">{err}</div>}</span>
-              <button 
-                onClick={handleClick} 
+              <button
+                onClick={handleClick}
                 className={`btn btn-primary mb-4 ${(isLoading || loading) ? 'loading' : ''}`}
                 disabled={isLoading || loading}
               >
                 {(isLoading || loading) ? 'Creating Account...' : 'Register'}
               </button>
-              
+
               {/* Divider */}
               <div className="divider">OR</div>
-              
+
               {/* Google Login Button */}
               <GoogleLoginButton />
             </div>
