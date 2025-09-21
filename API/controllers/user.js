@@ -11,7 +11,7 @@ export const getUser = (req, res) => {
     if (data.length === 0) {
       return res.status(404).json({ message: "User not found" }); // in case tneket show this
     }
-    const { password, ...info } = data[0];
+    const { ...info } = data[0];
     return res.json(info);
   });
 };

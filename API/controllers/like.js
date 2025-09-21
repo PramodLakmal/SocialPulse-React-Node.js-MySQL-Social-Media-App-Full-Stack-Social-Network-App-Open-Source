@@ -38,7 +38,7 @@ export const addLike = (req, res) => {
     console.log("Full Query:", fullQuery);
 
 
-    db.query(q, [values], (err, data) => {
+    db.query(q, [values], (err) => {
       if (err) return res.status(500).json(err);
       return res.status(200).json("Post has been Liked.");
     });
@@ -60,7 +60,7 @@ export const deleteLike = (req, res) => {
       const fullQuery = q + " with parameters: " + JSON.stringify([userInfo.id, req.query.postId]);
     console.log("Full Query:", fullQuery);
 
-    db.query(q, [userInfo.id, req.query.postId], (err, data) => {
+    db.query(q, [userInfo.id, req.query.postId], (err) => {
       if (err) return res.status(500).json(err);
       return res.status(200).json("Like has been Deleted.");
     });
