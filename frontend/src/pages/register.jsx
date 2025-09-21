@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import { AuthContext } from "../context/AuthContext";
 
 const Register = () => {
 
@@ -12,6 +12,10 @@ const Register = () => {
       name: "",
     });
     const [err, setErr] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    
+    const navigate = useNavigate();
+    const { register, loading } = useContext(AuthContext);
   
     const handleChange = (e) => {
       setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -19,17 +23,26 @@ const Register = () => {
   
     const handleClick = async (e) => {
       e.preventDefault();
+      setErr(null); // Clear previous errors
+      setIsLoading(true);
   
       try {
-        const response = await axios.post("http://localhost:8800/api/auth/register", inputs);
-    setErr(null); // Clear any previous errors
-    console.log(response.data); // Access data if it exists
-  } catch (error) {
-    if (error.response && error.response.data) {
-      setErr(error.response.data);
-    } else {
-      console.error("An error occurred:", error.message);
-    }
+        console.log("Attempting registration...");
+        const userData = await register(inputs);
+        
+        if (userData) {
+          console.log("Registration and auto-login successful, redirecting to home...");
+          // Redirect to home page
+          setTimeout(() => {
+            navigate("/", { replace: true });
+          }, 100);
+        }
+        
+      } catch (error) {
+        console.error("Registration error:", error);
+        setErr(error.response?.data || "Registration failed. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
     };
   
@@ -112,8 +125,12 @@ const Register = () => {
             </div>
             <div className="form-control mt-6">
               <span>{err && <div className="text-red-500 text-sm mb-2">{err}</div>}</span>
-              <button onClick={handleClick} className="btn btn-primary mb-4">
-                Register
+              <button 
+                onClick={handleClick} 
+                className={`btn btn-primary mb-4 ${(isLoading || loading) ? 'loading' : ''}`}
+                disabled={isLoading || loading}
+              >
+                {(isLoading || loading) ? 'Creating Account...' : 'Register'}
               </button>
               
               {/* Divider */}

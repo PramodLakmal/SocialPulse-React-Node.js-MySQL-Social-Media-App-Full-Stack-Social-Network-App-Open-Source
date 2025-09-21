@@ -15,16 +15,50 @@ export const AuthContextProvider = ({ children }) => {
   const login = async (inputs) => {
     try {
       setLoading(true);
+      console.log("Login function called with inputs:", inputs);
+      
       const res = await axios.post("http://localhost:8800/api/auth/login", inputs, {
         withCredentials: true,
       });
       
+      console.log("Login API response:", res.data);
       const userData = res.data;
+      
+      console.log("Setting current user:", userData);
       setCurrentUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
       setLoading(false);
+      
+      console.log("Login completed successfully");
       return userData;
     } catch (error) {
+      console.error("Login error in AuthContext:", error);
+      setLoading(false);
+      throw error;
+    }
+  };
+
+  const register = async (inputs) => {
+    try {
+      setLoading(true);
+      console.log("Register function called with inputs:", inputs);
+      
+      const res = await axios.post("http://localhost:8800/api/auth/register", inputs, {
+        withCredentials: true,
+      });
+      
+      console.log("Registration API response:", res.data);
+      const userData = res.data;
+      
+      console.log("Setting current user after registration:", userData);
+      setCurrentUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      setLoading(false);
+      
+      console.log("Registration and auto-login completed successfully");
+      return userData;
+    } catch (error) {
+      console.error("Registration error in AuthContext:", error);
       setLoading(false);
       throw error;
     }
@@ -62,16 +96,25 @@ export const AuthContextProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      console.log("Starting logout process...");
       setLoading(true);
+      
+      // Call backend logout endpoint
       await axios.post("http://localhost:8800/api/auth/logout", {}, {
         withCredentials: true,
       });
+      
+      console.log("Backend logout successful");
     } catch (error) {
       console.error("Logout error:", error);
+      // Continue with logout even if backend call fails
     } finally {
+      // Clear user state and localStorage regardless of backend response
+      console.log("Clearing user state and localStorage...");
       setCurrentUser(null);
       localStorage.removeItem("user");
       setLoading(false);
+      console.log("Logout process completed");
     }
   };
 
@@ -100,7 +143,7 @@ export const AuthContextProvider = ({ children }) => {
   }, []); // Empty dependency array - run only once
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, setCurrentUser, loading, checkAuthStatus }}>
+    <AuthContext.Provider value={{ currentUser, login, register, logout, setCurrentUser, loading, checkAuthStatus }}>
       {children}
     </AuthContext.Provider>
   );

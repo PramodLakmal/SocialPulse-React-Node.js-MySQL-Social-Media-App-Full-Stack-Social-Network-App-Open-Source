@@ -17,8 +17,8 @@ export const register = (req, res) => {
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
-    const q =
-      "INSERT INTO users (`username`,`email`,`password`,`name`) VALUE (?)";
+    const insertQuery =
+      "INSERT INTO users (`username`,`email`,`password`,`name`) VALUES (?)";
 
     const values = [
       req.body.username,
@@ -27,9 +27,33 @@ export const register = (req, res) => {
       req.body.name,
     ];
 
-    db.query(q, [values], (err) => {
+    db.query(insertQuery, [values], (err, result) => {
       if (err) return res.status(500).json(err);
-      return res.status(200).json("User has been created.");
+      
+      // Get the newly created user's ID
+      const newUserId = result.insertId;
+      
+      // Fetch the complete user data (excluding password)
+      const getUserQuery = "SELECT id, username, email, name, profilePic, coverPic, city, website FROM users WHERE id = ?";
+      
+      db.query(getUserQuery, [newUserId], (err, userData) => {
+        if (err) return res.status(500).json(err);
+        
+        if (userData.length === 0) {
+          return res.status(500).json("Failed to retrieve user data");
+        }
+        
+        // Generate JWT token for auto-login
+        const token = jwt.sign({ id: newUserId }, "secretkey");
+        
+        // Set cookie and return user data (auto-login)
+        res
+          .cookie("accessToken", token, {
+            httpOnly: true,
+          })
+          .status(200)
+          .json(userData[0]);
+      });
     });
   });
 };

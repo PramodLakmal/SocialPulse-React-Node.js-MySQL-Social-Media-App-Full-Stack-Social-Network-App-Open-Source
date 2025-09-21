@@ -6,11 +6,9 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { makeRequest } from "../axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Navbar = () => {
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, logout } = useContext(AuthContext);
 
   const handleToggle = (e) => {
     if (e.target.checked) {
@@ -30,47 +28,17 @@ const Navbar = () => {
     document.querySelector("html").setAttribute("data-theme", localTheme);
   }, [theme]);
 
-  //   const queryClient = useQueryClient();
-  //   // Logout mutation
-  //   const logoutMutaion = useMutation({
-
-  //     mutationFn: () => makeRequest.logout(),
-
-  //     onSuccess: () => {
-  //       // Invalidate and refetch
-  //       queryClient.invalidateQueries({ queryKey: ["auth"] });
-  //     },
-
-  //   });
-
-  // const handleLogout =()=>{
-  //   // console.log("button working")
-  //   logoutMutaion.mutate();
-  // }
-
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      try {
-        const response = await makeRequest.post("/auth/logout");
-        localStorage.removeItem("user"); // just for testing
-        return response.data;
-      } catch (error) {
-        throw new Error(error.response.data.message || "Logout failed");
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auth"] });
 
-      navigate("/login");
-    },
-  });
-
-  const handleLogout = () => {
-    console.log("Logging out...");
-    logoutMutation.mutate();
+  const handleLogout = async () => {
+    try {
+      console.log("Logging out...");
+      await logout();
+      console.log("Logout successful, redirecting to login...");
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (

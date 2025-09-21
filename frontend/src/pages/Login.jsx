@@ -1,6 +1,6 @@
 
-import { useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useContext, useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 
@@ -12,8 +12,19 @@ const Login = () => {
   });
   const [err, setErr] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
 
-const navigate = useNavigate() 
+const navigate = useNavigate();
+const location = useLocation();
+
+  // Check for success message from registration
+  useEffect(() => {
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+      // Clear the message from location state
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]); 
 
   const handleChange = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -23,14 +34,19 @@ const navigate = useNavigate()
   const handleLogin = async (e) => {
     e.preventDefault();
     setErr(null); // Clear previous errors
+    setSuccessMessage(null); // Clear any success messages
     setIsLoading(true);
     
     try {
+      console.log("Attempting login...");
       const userData = await login(inputs);
+      console.log("Login successful, user data:", userData);
+      
       if (userData) {
+        console.log("Redirecting to home page...");
         // Small delay to ensure state is set
         setTimeout(() => {
-          navigate("/");
+          navigate("/", { replace: true });
         }, 100);
       }
     } catch (err) {
@@ -69,6 +85,7 @@ const navigate = useNavigate()
             </label>
           </div>
           <div className="form-control mt-6">
+            {successMessage && <div className="text-green-500 text-sm mb-2">{successMessage}</div>}
             {err && <div className="text-red-500 text-sm mb-2">{err}</div>}
             <button 
               onClick={handleLogin} 

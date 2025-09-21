@@ -70,11 +70,12 @@ const queryClient = new QueryClient()
     
     // Only redirect to login if we're sure the user is not authenticated
     // and we're not in a loading state
-    if (!loading && currentUser === null) {
+    if (!loading && !currentUser) {
       console.log("No user found, redirecting to login");
       return <Navigate to="/login" replace />;
     }
     
+    console.log("User authenticated, rendering protected content");
     return children;
   };
 
@@ -101,11 +102,11 @@ const queryClient = new QueryClient()
     },
     {
       path: '/login',
-      element: <Login />,
+      element: currentUser ? <Navigate to="/" replace /> : <Login />,
     },
     {
       path: '/register',
-      element: <Register />,
+      element: currentUser ? <Navigate to="/" replace /> : <Register />,
     },
     {
       path: '/home',
