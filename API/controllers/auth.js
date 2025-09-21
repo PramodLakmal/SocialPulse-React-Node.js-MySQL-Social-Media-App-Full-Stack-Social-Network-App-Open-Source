@@ -24,7 +24,7 @@ export const register = (req, res) => {
       req.body.name,
     ];
 
-    db.query(q, [values], (err, data) => {
+    db.query(q, [values], (err) => {
       if (err) return res.status(500).json(err);
       return res.status(200).json("User has been created.");
     });
@@ -80,7 +80,7 @@ export const login = (req, res) => {
 
     const token = jwt.sign({ id: data[0].id }, "secretkey");
 
-    const { password, ...others } = data[0];
+    const { ...others } = data[0];
 
     res
       .cookie("accessToken", token, {
