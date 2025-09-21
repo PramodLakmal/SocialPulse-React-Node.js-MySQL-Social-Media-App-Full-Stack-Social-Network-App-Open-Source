@@ -51,7 +51,7 @@ export const register = (req, res) => {
         }
 
         // Generate JWT token for auto-login
-        const token = jwt.sign({ id: newUserId }, "secretkey");
+        const token = jwt.sign({ id: newUserId }, process.env.JWT_SECRET);
 
         // Set cookie and return user data (auto-login)
         res
@@ -117,7 +117,7 @@ export const login = (req, res) => {
     if (!checkPassword)
       return res.status(400).json("Wrong password or username!");
 
-    const token = jwt.sign({ id: data[0].id }, "secretkey");
+    const token = jwt.sign({ id: data[0].id }, process.env.JWT_SECRET);
 
     const { ...others } = data[0];
 
@@ -151,7 +151,7 @@ export const googleAuthSuccess = (req, res) => {
 
     console.log("Creating JWT for user ID:", req.user.id);
     // Generate JWT token
-    const token = jwt.sign({ id: req.user.id }, "secretkey");
+    const token = jwt.sign({ id: req.user.id }, process.env.JWT_SECRET);
 
     // Remove password from user object
     const { password, ...userWithoutPassword } = req.user;
@@ -184,7 +184,7 @@ export const checkAuth = (req, res) => {
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Not authenticated!");
 
-  jwt.verify(token, "secretkey", (err, userInfo) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, userInfo) => {
     if (err) return res.status(403).json("Token is not valid!");
 
     const q = "SELECT * FROM users WHERE id = ?";
