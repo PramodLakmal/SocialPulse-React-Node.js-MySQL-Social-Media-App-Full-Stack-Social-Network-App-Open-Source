@@ -11,6 +11,7 @@ import postRoutes from "./routes/posts.js";
 import usersRoutes from "./routes/users.js";
 import relationshipRoutes from "./routes/relationships.js";
 import storiesRoutes from "./routes/stories.js";
+import adminRoutes from "./routes/admin.js";
 import multer from "multer";
 
 dotenv.config();
@@ -74,6 +75,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/relationships", relationshipRoutes);
 app.use("/api/stories", storiesRoutes);
+app.use("/api/admin", adminRoutes);
 
 
 app.listen(8800, () => {
