@@ -145,6 +145,16 @@ const Navbar = () => {
                   </NavLink>
                 
               </li>
+              {currentUser?.role === 'admin' && (
+                <li>
+                  <NavLink to="/admin">
+                    <a className="justify-between">
+                      Admin Panel
+                      <span className="badge badge-primary">Admin</span>
+                    </a>
+                  </NavLink>
+                </li>
+              )}
               <li>
                 <a onClick={handleLogout}>Logout</a>
               </li>

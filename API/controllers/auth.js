@@ -103,30 +103,65 @@ function isStrongPassword(password) {
 
 
 export const login = (req, res) => {
-  const q = "SELECT * FROM users WHERE username = ?";
+  const q = `
+    SELECT u.*, r.name as role_name
+    FROM users u
+    JOIN roles r ON u.role_id = r.id
+    WHERE u.username = ? AND u.status = 'active'
+  `;
 
   db.query(q, [req.body.username], (err, data) => {
     if (err) return res.status(500).json(err);
-    if (data.length === 0) return res.status(404).json("User not found!");
+    if (data.length === 0) return res.status(404).json("User not found or inactive!");
+
+    const user = data[0];
+
+    // Check if password exists (for non-Google OAuth users)
+    if (!user.password) {
+      return res.status(400).json("Please use Google Sign-in for this account!");
+    }
 
     const checkPassword = bcrypt.compareSync(
       req.body.password,
-      data[0].password
+      user.password
     );
 
     if (!checkPassword)
       return res.status(400).json("Wrong password or username!");
 
-    const token = jwt.sign({ id: data[0].id }, process.env.JWT_SECRET);
+    // Update last login
+    const updateLoginQuery = "UPDATE users SET last_login = NOW() WHERE id = ?";
+    db.query(updateLoginQuery, [user.id]);
 
-    const { ...others } = data[0];
+    // Get user permissions
+    const permissionsQuery = `
+      SELECT p.name as permission_name
+      FROM role_permissions rp
+      JOIN permissions p ON rp.permission_id = p.id
+      WHERE rp.role_id = ?
+    `;
 
-    res
-      .cookie("accessToken", token, {
-        httpOnly: true,
-      })
-      .status(200)
-      .json(others);
+    db.query(permissionsQuery, [user.role_id], (err, permissionsData) => {
+      if (err) return res.status(500).json(err);
+
+      const permissions = permissionsData.map(p => p.permission_name);
+
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
+
+      const { password, ...userWithoutPassword } = user;
+      const responseUser = {
+        ...userWithoutPassword,
+        role: user.role_name,
+        permissions: permissions
+      };
+
+      res
+        .cookie("accessToken", token, {
+          httpOnly: true,
+        })
+        .status(200)
+        .json(responseUser);
+    });
   });
 };
 
@@ -187,13 +222,41 @@ export const checkAuth = (req, res) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, userInfo) => {
     if (err) return res.status(403).json("Token is not valid!");
 
-    const q = "SELECT * FROM users WHERE id = ?";
+    const q = `
+      SELECT u.*, r.name as role_name
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      WHERE u.id = ? AND u.status = 'active'
+    `;
+    
     db.query(q, [userInfo.id], (err, data) => {
       if (err) return res.status(500).json(err);
-      if (data.length === 0) return res.status(404).json("User not found!");
+      if (data.length === 0) return res.status(404).json("User not found or inactive!");
 
-      const { password, ...others } = data[0];
-      return res.status(200).json(others);
+      const user = data[0];
+
+      // Get user permissions
+      const permissionsQuery = `
+        SELECT p.name as permission_name
+        FROM role_permissions rp
+        JOIN permissions p ON rp.permission_id = p.id
+        WHERE rp.role_id = ?
+      `;
+
+      db.query(permissionsQuery, [user.role_id], (err, permissionsData) => {
+        if (err) return res.status(500).json(err);
+
+        const permissions = permissionsData.map(p => p.permission_name);
+
+        const { password, ...userWithoutPassword } = user;
+        const responseUser = {
+          ...userWithoutPassword,
+          role: user.role_name,
+          permissions: permissions
+        };
+
+        return res.status(200).json(responseUser);
+      });
     });
   });
 };

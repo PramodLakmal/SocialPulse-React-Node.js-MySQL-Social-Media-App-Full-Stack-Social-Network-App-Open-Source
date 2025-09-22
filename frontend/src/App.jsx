@@ -13,6 +13,11 @@ import Register from './pages/register';
 import Home from './pages/home';
 import Profile from './pages/profile';
 
+// Admin Pages
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminPostsPage from './pages/admin/AdminPostsPage';
+
 // Components
 import Navbar from './components/Navbar';
 import Leftbar from './components/Leftbar';
@@ -79,6 +84,27 @@ const queryClient = new QueryClient()
     return children;
   };
 
+  // eslint-disable-next-line react/prop-types
+  const AdminRoute = ({ children }) => {
+    if (loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      );
+    }
+    
+    if (!currentUser) {
+      return <Navigate to="/login" replace />;
+    }
+    
+    if (currentUser.role !== 'admin') {
+      return <Navigate to="/" replace />;
+    }
+    
+    return children;
+  };
+
   
 
   const router = createBrowserRouter([
@@ -113,6 +139,24 @@ const queryClient = new QueryClient()
       element: <ProtectedRoute>
         <Home />
       </ProtectedRoute>,
+    },
+    {
+      path: '/admin',
+      element: <AdminRoute>
+        <AdminDashboardPage />
+      </AdminRoute>,
+    },
+    {
+      path: '/admin/users',
+      element: <AdminRoute>
+        <AdminUsersPage />
+      </AdminRoute>,
+    },
+    {
+      path: '/admin/posts',
+      element: <AdminRoute>
+        <AdminPostsPage />
+      </AdminRoute>,
     },
   ]);
 
