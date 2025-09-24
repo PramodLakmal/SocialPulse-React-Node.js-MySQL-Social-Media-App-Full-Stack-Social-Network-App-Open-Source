@@ -56,7 +56,6 @@ const Stories = () => {
   // Define handleUpdate function
   const handlesharebutton = () => {
     setAddStory(prevState => !prevState);
-    // console.log("working")
 }
 
 
@@ -67,11 +66,6 @@ const { isPending, data,error } = useQuery({
       return res.data;
     }),
   });
-  
-  console.log("data",data);
-  
-
-  
 
   const { currentUser } = useContext(AuthContext);
   const userId = currentUser.id;

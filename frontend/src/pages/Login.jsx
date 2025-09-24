@@ -38,12 +38,9 @@ const location = useLocation();
     setIsLoading(true);
     
     try {
-      console.log("Attempting login...");
       const userData = await login(inputs);
-      console.log("Login successful, user data:", userData);
       
       if (userData) {
-        console.log("Redirecting to home page...");
         // Small delay to ensure state is set
         setTimeout(() => {
           navigate("/", { replace: true });

@@ -13,7 +13,6 @@ export const getComments =(req,res) =>{
         return res.status(200).json(data);
       });
      
-//console.log(req.query.postId)
 
 };
 

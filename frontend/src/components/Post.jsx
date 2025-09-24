@@ -19,7 +19,6 @@ const Post = ({ post }) => {
   const shouldRenderImage = Boolean(post.img);
   const postidforcomment = post.id;
 
-  //  console.log(currentUser.currentUser.id)
   const { isPending, data } = useQuery({
     queryKey: ["likes", post.id],
     queryFn: () =>
@@ -59,10 +58,7 @@ const Post = ({ post }) => {
   const handleDelete = () => {
     DeleteMutation.mutate(post.id);
   };
-  // console.log(post.userid);
-  // console.log(currentUser.currentUser.id);
-  // console.log(post.userId === currentUser.currentUser.id)
-  //console.log("Post x : ",post)
+
   return (
     <>
       {isPending ? (

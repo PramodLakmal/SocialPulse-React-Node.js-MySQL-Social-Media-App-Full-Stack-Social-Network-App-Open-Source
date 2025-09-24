@@ -5,9 +5,7 @@ import jwt from "jsonwebtoken";
 
 export const getPosts = (req, res) => {
  const userId = req.query.userId;
-  // console.log('UserId from query parameters:', req.query.userId);
-  // console.log('Request :', req.query);
-  //const userId = '3';
+
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Not logged in!"); 
 
