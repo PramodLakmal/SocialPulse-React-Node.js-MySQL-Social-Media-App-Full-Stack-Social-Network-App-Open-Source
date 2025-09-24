@@ -9,15 +9,12 @@ export const getLikes = (req,res) =>{
 
      db.query(q, [req.query.postId], (err, data) => {
        if (err) return res.status(500).json(err);
-      //  console.log(data.map(like=>like.userId));
       return res.status(200).json(data.map(like=>like.userId));
       //return res.status(200).json(data);
      });
     
 
 } 
-
-
 
 export const addLike = (req, res) => {
   const token = req.cookies.accessToken;
@@ -35,8 +32,6 @@ export const addLike = (req, res) => {
 
 
     const fullQuery = q + " with parameters: " + JSON.stringify(values);
-    console.log("Full Query:", fullQuery);
-
 
     db.query(q, [values], (err) => {
       if (err) return res.status(500).json(err);
@@ -58,7 +53,6 @@ export const deleteLike = (req, res) => {
     
 
       const fullQuery = q + " with parameters: " + JSON.stringify([userInfo.id, req.query.postId]);
-    console.log("Full Query:", fullQuery);
 
     db.query(q, [userInfo.id, req.query.postId], (err) => {
       if (err) return res.status(500).json(err);

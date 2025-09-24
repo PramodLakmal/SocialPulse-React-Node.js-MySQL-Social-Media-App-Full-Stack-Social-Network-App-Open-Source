@@ -18,7 +18,6 @@ const Profile = () => {
   // Define handleUpdate function
 const handleUpdate = () => {
   setOpenUpdate(prevState => !prevState);
-  // console.log("working")
 }
 
 // Use handleUpdate function in onClick event
@@ -27,7 +26,6 @@ const handleUpdate = () => {
 
   // Extract userId from the URL pathname
   const userId = parseInt(useLocation().pathname.split("/")[2]);
-  // console.log("testing url", userId);
   const { currentUser } = useContext(AuthContext);
   // Fetch user data using userId
   const { isPending, data } = useQuery({
@@ -47,8 +45,6 @@ const handleUpdate = () => {
           return res.data;
         }),
   });
-
-  //console.log(relationshipData);
 
   const queryClient = useQueryClient();
 

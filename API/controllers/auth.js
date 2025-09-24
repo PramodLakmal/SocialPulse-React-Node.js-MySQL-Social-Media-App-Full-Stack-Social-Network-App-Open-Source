@@ -16,7 +16,6 @@ export const register = (req, res) => {
 
   //CHECK USER IF EXISTS
   const q = "SELECT * FROM users WHERE username = ?";
-  console.log(req.body.password)
   db.query(q, [req.body.username], (err, data) => {
     if (err) return res.status(500).json(err);
     if (data.length) return res.status(409).json("User already exists!");
@@ -166,7 +165,6 @@ export const login = (req, res) => {
 };
 
 export const logout = (req, res) => {
-  //console.log("working")
   res.clearCookie("accessToken", {
     secure: true,
     sameSite: "none"
@@ -176,21 +174,17 @@ export const logout = (req, res) => {
 // Google OAuth success callback
 export const googleAuthSuccess = (req, res) => {
   try {
-    console.log("Google auth success callback triggered");
-    console.log("User object:", req.user ? 'Present' : 'Missing');
 
     if (!req.user) {
       console.error("No user object in request");
       return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
     }
 
-    console.log("Creating JWT for user ID:", req.user.id);
     // Generate JWT token
     const token = jwt.sign({ id: req.user.id }, process.env.JWT_SECRET);
 
     // Remove password from user object
     const { password, ...userWithoutPassword } = req.user;
-    console.log("User authenticated successfully:", userWithoutPassword.email);
 
     // Set cookie and redirect to frontend home page
     res
@@ -202,7 +196,6 @@ export const googleAuthSuccess = (req, res) => {
       })
       .redirect(`${process.env.FRONTEND_URL}/`);
 
-    console.log("Redirecting to frontend with auth cookie set");
   } catch (error) {
     console.error("Google auth success error:", error);
     res.redirect(`${process.env.FRONTEND_URL}/login?error=server_error`);

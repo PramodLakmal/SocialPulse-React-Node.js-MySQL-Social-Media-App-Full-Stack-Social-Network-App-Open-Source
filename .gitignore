@@ -7,3 +7,6 @@ frontend/node_modules/
 
 # Ignore node_modules directory in the API directory
 API/node_modules/
+
+# Ignore env files in the API directory
+API/.env

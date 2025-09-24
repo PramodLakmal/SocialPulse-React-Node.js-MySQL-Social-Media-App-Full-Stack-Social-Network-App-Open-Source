@@ -51,11 +51,9 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      console.log("Attempting registration...");
       const userData = await register(inputs);
 
       if (userData) {
-        console.log("Registration and auto-login successful, redirecting to home...");
         // Redirect to home page
         setTimeout(() => {
           navigate("/", { replace: true });
@@ -69,8 +67,6 @@ const Register = () => {
       setIsLoading(false);
     }
   };
-
-  console.log(err)
 
   return (
     <div className="hero min-h-screen bg-base-200">

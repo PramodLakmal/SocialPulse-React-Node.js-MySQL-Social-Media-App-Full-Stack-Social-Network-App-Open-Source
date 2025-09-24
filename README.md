@@ -134,6 +134,25 @@ Configure MySQL database settings in the backend configuration files.
  password: 123456789
 ```
 
+## Environment Configuration
+
+To run this application securely, create a `.env` file in the root directory with the following variables:
+
+```env
+JWT_SECRET=your_strong_random_secret_here
+SESSION_SECRET=another_strong_random_string
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+
+DB_HOST=host name
+DB_USER=user name
+DB_PASSWORD=
+DB_NAME=your db name
+
+# Server Configuration
+PORT=number
+FRONTEND_URL=http://localhost:####
+
 
 ~~Note: I'll upload the database once the project is completed.~~
 

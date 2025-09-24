@@ -11,7 +11,6 @@ const home = () => {
   // Force auth check when home page loads if user is null and not loading
   useEffect(() => {
     if (!currentUser && !loading) {
-      console.log("Home page loaded without user, checking auth status...");
       // Small delay to ensure any OAuth redirects have completed
       const timer = setTimeout(() => {
         if (typeof checkAuthStatus === 'function') {

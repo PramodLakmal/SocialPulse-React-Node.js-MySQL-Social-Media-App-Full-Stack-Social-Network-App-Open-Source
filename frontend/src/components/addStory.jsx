@@ -39,7 +39,6 @@ const Update = ({ setAddStory }) => {
     e.preventDefault();
     let imgUrl = "";
     if (file) imgUrl = await upload();
-    // console.log("imgUrl: ",imgUrl)
     mutation.mutate({ img: imgUrl });
     
     setfile(null);
