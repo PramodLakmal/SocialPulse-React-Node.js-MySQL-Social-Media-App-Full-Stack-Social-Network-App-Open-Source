@@ -362,7 +362,7 @@ export const getAnalytics = (req, res) => {
   analyticsQueries.forEach((query, index) => {
     db.query(query, (err, data) => {
       if (err) {
-        console.error(`Analytics query ${index} failed:`, err);
+        console.error('Analytics query failed', { queryIndex: index, error: err });
         results[queryNames[index]] = null;
       } else {
         if (index <= 6) {
