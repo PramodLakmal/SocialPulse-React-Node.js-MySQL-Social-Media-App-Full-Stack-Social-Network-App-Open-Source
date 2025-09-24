@@ -57,9 +57,6 @@ const queryClient = new QueryClient()
       </div>
     );
   };
-
-  console.log("Current user:", currentUser)
-  console.log("Loading state:", loading)
   
   // eslint-disable-next-line react/prop-types
   const ProtectedRoute = ({ children }) => {
